@@ -1,4 +1,4 @@
-BUILD_TARGETS=example-service-cli example-service
+BUILD_TARGETS=gpm
 
 include Makefile.const
 

@@ -4,8 +4,9 @@ import "github.com/rs/zerolog/log"
 
 // ServiceConfig structure with all the options required by the service and service components.
 type ServiceConfig struct {
-	Version string
-	Commit  string
+	Version  string
+	Commit   string
+	TempPath string
 }
 
 // IsValid checks if the configuration options are valid.
@@ -17,4 +18,5 @@ func (sc *ServiceConfig) IsValid() error {
 func (sc *ServiceConfig) Print() {
 	// Use logger to print the configuration
 	log.Info().Str("version", sc.Version).Str("commit", sc.Commit).Msg("app config")
+	log.Info().Str("Temp", sc.TempPath).Msg("Paths")
 }

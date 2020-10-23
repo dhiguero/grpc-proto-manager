@@ -1,6 +1,8 @@
 package main
 
-import "github.com/dhiguero/go-template/cmd/example-service-cli/commands"
+import (
+	"github.com/dhiguero/grpc-proto-manager/cmd/gpm/commands"
+)
 
 // Version of the command
 var Version string

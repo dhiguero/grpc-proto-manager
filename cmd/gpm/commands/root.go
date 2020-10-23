@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dhiguero/go-template/internal/app/example-service/config"
+	"github.com/dhiguero/grpc-proto-manager/internal/app/gpm/config"
 	"github.com/spf13/cobra"
 )
 
 var appConfig config.ServiceConfig
 
 var rootCmd = &cobra.Command{
-	Use:     "example-service",
-	Short:   "Example service",
-	Long:    `Example service`,
+	Use:     "gpm",
+	Short:   "gRPC proto manager",
+	Long:    `A simple manager to orchestrate the generation of gRPC protos`,
 	Version: "TBD",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
@@ -31,3 +31,7 @@ func Execute(version string, commit string) {
 		os.Exit(1)
 	}
 }
+
+//func init() {
+//	cobra.OnInitialize(readConfig)
+//}
