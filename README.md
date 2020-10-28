@@ -18,12 +18,14 @@ The tool relies in a simple directory structure to create the protos.
 
 ## TODO
 
-- Method to download a repository from gitHub
-- Method to compare two files
-- Method to compare two directories
-- Method to generate a set of protos
-- Method to calculate versions
-- Method to upload the changes to github
+- Add tests
+
+## Inspiration
+
+Organizing and managing a protobuf repository is something that may developers and companies face, some of the resources that inspired this tool are:
+
+- https://medium.com/namely-labs/how-we-build-grpc-services-at-namely-52a3ae9e7c35
+- https://medium.com/building-ibotta/building-a-scaleable-protocol-buffers-grpc-artifact-pipeline-5265c5118c9d
 
 ## License
 

@@ -32,6 +32,6 @@ func Execute(version string, commit string) {
 	}
 }
 
-//func init() {
-//	cobra.OnInitialize(readConfig)
-//}
+func init() {
+	rootCmd.PersistentFlags().BoolVar(&appConfig.Debug, "debug", false, "Enable debug log")
+}

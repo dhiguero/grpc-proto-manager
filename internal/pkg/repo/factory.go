@@ -25,8 +25,14 @@ var RepositoryTypeToEnum = map[string]RepositoryType{
 
 // Provider defines the common interface for different repository managers (e.g., GitHub)
 type Provider interface {
+	// GetRepoURL builds the URL require for clone and commit operations.
+	GetRepoURL(organization string, repoName string) string
 	// Clone a given repository to a path
 	Clone(repoURL string, outputPath string) error
+	// GetLastVersion obtains the latest version of the repo.
+	GetLastVersion(repoPath string) (*Version, error)
+	// Publish the changes and create a new version tag.
+	Publish(repoPath string, newVersion *Version) error
 }
 
 // NewRepoProvider factory method to instantiate a repository provider for a given system.

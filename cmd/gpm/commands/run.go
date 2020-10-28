@@ -24,24 +24,31 @@ var generateCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		readConfig(args[0])
-
-		for k, v := range viper.AllSettings() {
-			log.Info().Str("key", k).Interface("value", v).Msg("viper element")
-		}
-
-		log.Info().Str("temp", viper.GetString("tempPath")).Msg("From viper")
 		gpm := manager.NewManager(appConfig)
-		gpm.Run(args[0])
+		err := gpm.Run(args[0])
+		if err != nil {
+			log.Fatal().Err(err).Msg("generation failed")
+		}
 	},
 }
 
 func init() {
-	generateCmd.Flags().StringVar(&appConfig.TempPath, "tempPath", "/tmp", "Temporal file for the generation of intermediate data")
-	viper.BindPFlag("tempPath", generateCmd.Flags().Lookup("tempPath"))
+	generateCmd.Flags().String("tempPath", "/tmp",
+		"Temporal file for the generation of intermediate data")
+	generateCmd.Flags().StringVar(&appConfig.GeneratorName, "protoGenerator", "docker", "Implementation used to generate the proto code.")
+	generateCmd.Flags().Bool("skipPublish", false, "Flag to skip publishing the generated protos")
+	err := viper.BindPFlag("tempPath", generateCmd.Flags().Lookup("tempPath"))
+	if err != nil {
+		log.Error().Err(err).Msg("unable to bind viper key")
+	}
+
 	rootCmd.AddCommand(generateCmd)
 }
 
+// readConfig gets the project configuration and applies it.
 func readConfig(fromPath string) {
+	viper.SetEnvPrefix("GPM")
+	viper.AutomaticEnv()
 	viper.AddConfigPath(fromPath)
 	viper.SetConfigName(".gpm") // name of config file (without extension)
 	viper.SetConfigType("yaml") // REQUIRED if the config file does not have the extension in the name
@@ -53,5 +60,10 @@ func readConfig(fromPath string) {
 			log.Fatal().Err(err).Msg("unable to read configuration file")
 		}
 	}
+
+	if err := viper.Unmarshal(&appConfig); err != nil {
+		log.Fatal().Err(err).Msg("unable to unmarshal resolved configuration into config structure. Check structure/file structure for a mismatch")
+	}
+	appConfig.ProjectPath = fromPath
 	log.Info().Str("path", viper.ConfigFileUsed()).Msg("configuration loaded")
 }
