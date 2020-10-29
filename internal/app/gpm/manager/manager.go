@@ -17,6 +17,9 @@ import (
 // ProtoLangFileName defines the name of the file that specifies the target languages.
 const ProtoLangFileName = ".protolangs"
 
+// ExcludedDirs with the list of directories that will be excluded by default.
+var ExcludedDirs = []string{".git"}
+
 // GPM structure with the manager main loop.
 type GPM struct {
 	cfg                config.ServiceConfig
@@ -57,7 +60,7 @@ func (gpm *GPM) Run(basePath string) error {
 	}
 
 	for _, info := range fileInfo {
-		if info.IsDir() {
+		if info.IsDir() && !gpm.isExcluded(info.Name()) {
 			targetPath := path.Join(basePath, info.Name())
 			err := gpm.ProcessProtoDirectory(targetPath, info.Name())
 			if err != nil {
@@ -67,6 +70,16 @@ func (gpm *GPM) Run(basePath string) error {
 	}
 
 	return err
+}
+
+// isExcluded method to check if the directory should be excluded from the generation process.
+func (gpm *GPM) isExcluded(dirName string) bool {
+	for _, excludedDir := range ExcludedDirs {
+		if excludedDir == dirName {
+			return true
+		}
+	}
+	return false
 }
 
 // LoadProtoLangs loads the file in each directory that defines the target languages. If none is found, the default one for
