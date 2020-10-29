@@ -6,6 +6,7 @@ Generating gRPC protos can be a critical tasks for development. However, automat
 <my_base_path>/myservice -> github.com/my_user/grpc-myservice-<target_language>
 ```
 
+
 ## Layout structure
 
 The tool relies in a simple directory structure to create the protos.
@@ -23,6 +24,22 @@ Yes! For a working example, check the following repositories:
 * [gpm-example](https://github.com/dhiguero/gpm-example): Simple monorepo with the layout structure expected by GPM. It contains two protobuf services: ping and agenda.
 * [grpc-agenda-go](https://github.com/dhiguero/grpc-agenda-go): Repository containing the golang generated code for the agenda service.
 * [grpc-ping-go](https://github.com/dhiguero/grpc-ping-go): Repository containing the golang generated code for the ping service.
+
+```
+$ ./bin/darwin/gpm generate /<full_path>/gpm-example
+9:03PM INF configuration loaded path=/<full_path>/gpm-example/.gpm.yaml
+9:03PM DBG Launching GPM
+9:03PM INF app config commit=0465ed57eeb8a3e890c33b1c23ac8467ad1be365 version=v0.0.1
+9:03PM INF Paths Project=/<full_path>/gpm-example Temp=/tmp/gpm
+9:03PM INF Providers Repository=github generator=docker
+9:03PM INF Defaults Language=go
+9:03PM INF generated code repository URL=dhiguero
+9:03PM INF processing proto directory path=/<full_path>/gpm-example/agenda
+9:03PM INF publishing new version newVersion=v0.1.0 repo=grpc-agenda-go
+9:03PM INF processing proto directory path=/<full_path>/gpm-example/ping
+9:03PM INF publishing new version newVersion=v0.1.0 repo=grpc-ping-go
+```
+
 
 ## Roadmap/TODO
 
