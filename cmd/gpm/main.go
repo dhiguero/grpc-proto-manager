@@ -1,7 +1,11 @@
 package main
 
 import (
-	"github.com/dhiguero/go-template/cmd/example-service/commands"
+	"os"
+
+	"github.com/dhiguero/grpc-proto-manager/cmd/gpm/commands"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 // Version of the command
@@ -11,5 +15,6 @@ var Version string
 var Commit string
 
 func main() {
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	commands.Execute(Version, Commit)
 }
