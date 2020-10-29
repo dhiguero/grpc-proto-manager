@@ -16,9 +16,20 @@ The tool relies in a simple directory structure to create the protos.
 
 3. To specify the target languages use a file named `.protolang` inside each directory. Be aware that this has been tested for now for Golang, other languages may not work :).
 
-## TODO
+## Can I see a working example?
+
+Yes! For a working example, check the following repositories:
+
+* [gpm-example](https://github.com/dhiguero/gpm-example): Simple monorepo with the layout structure expected by GPM. It contains two protobuf services: ping and agenda.
+* [grpc-agenda-go](https://github.com/dhiguero/grpc-agenda-go): Repository containing the golang generated code for the agenda service.
+* [grpc-ping-go](https://github.com/dhiguero/grpc-ping-go): Repository containing the golang generated code for the ping service.
+
+## Roadmap/TODO
 
 - Add tests
+- Improve parametrization
+- Brew installation
+- Integration with GitHub actions
 
 ## Inspiration
 
