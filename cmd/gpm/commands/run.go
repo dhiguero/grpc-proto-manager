@@ -36,7 +36,7 @@ func init() {
 	generateCmd.Flags().String("tempPath", "/tmp",
 		"Temporal file for the generation of intermediate data")
 	generateCmd.Flags().StringVar(&appConfig.GeneratorName, "protoGenerator", "docker", "Implementation used to generate the proto code.")
-	generateCmd.Flags().Bool("skipPublish", false, "Flag to skip publishing the generated protos")
+	generateCmd.Flags().BoolVar(&appConfig.SkipPublish, "skipPublish", false, "Flag to skip publishing the generated protos")
 	err := viper.BindPFlag("tempPath", generateCmd.Flags().Lookup("tempPath"))
 	if err != nil {
 		log.Error().Err(err).Msg("unable to bind viper key")
