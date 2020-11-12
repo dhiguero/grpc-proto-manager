@@ -39,6 +39,7 @@ func (gpm *GPM) Run(basePath string) error {
 		log.Fatal().Err(err).Msg("invalid configuration options")
 	}
 	gpm.cfg.Print()
+	defer gpm.cleanup(basePath, gpm.cfg.TempPath)
 
 	repoProvider, err := repo.NewRepoProvider(gpm.cfg.RepositoryProvider)
 	if err != nil {
@@ -70,6 +71,26 @@ func (gpm *GPM) Run(basePath string) error {
 	}
 
 	return err
+}
+
+// cleanup function to delete temporal directories.
+func (gpm *GPM) cleanup(basePath string, tempPath string) {
+	log.Debug().Str("basePath", basePath).Str("tempPath", tempPath).Msg("cleaning temporal directories")
+	generatedPath := path.Join(basePath, "generated")
+	_, err := os.Stat(generatedPath)
+	if err == nil {
+		// Otherwise, assume directory has not being generated.
+		if rerr := os.RemoveAll(generatedPath); rerr != nil {
+			log.Warn().Str("generatedPath", generatedPath).Err(rerr).Msg("unable to deleted directory with temporal generated code")
+		}
+	}
+	_, err = os.Stat(tempPath)
+	if err == nil {
+		// Otherwise, assume directory has not being generated.
+		if rerr := os.RemoveAll(tempPath); rerr != nil {
+			log.Warn().Str("tempPath", tempPath).Err(rerr).Msg("unable to deleted directory with temporal downloaded code")
+		}
+	}
 }
 
 // isExcluded method to check if the directory should be excluded from the generation process.
