@@ -11,6 +11,7 @@ COMMIT=$(shell git log -1 --pretty=format:"%H")
 # Tools
 GO_CMD=go
 GO_BUILD=$(GO_CMD) build
+GO_TEST=$(GO_CMD) test
 GO_LDFLAGS=-ldflags "-X main.Version=$(VERSION) -X=main.Commit=$(COMMIT)"
 
 # Docker options
@@ -20,10 +21,13 @@ TARGET_DOCKER_REGISTRY ?= $$USER
 TARGET_K8S_NAMESPACE ?= default
 
 .PHONY: clean
-
 clean:
 	rm -r bin
 	mkdir -p bin/darwin/
+
+# make all action to perform all steps.
+.PHONY: all
+all: clean test build 
 
 # Build target for local environment default
 build: $(addsuffix .local,$(BUILD_TARGETS))
@@ -39,6 +43,10 @@ build-linux: $(addsuffix .linux,$(BUILD_TARGETS))
 %.linux:
 	@ echo "Building linux binary $@"
 	@GOOS=linux GOARCH=amd64 CGO_ENABLED=0 $(GO_BUILD) $(GO_LDFLAGS) -o bin/linux/$(basename $@) ./cmd/$(basename $@)/main.go
+
+.PHONY: test
+test:
+	@$(GO_TEST) -v ./...
 
 .PHONY: docker
 docker: $(addsuffix .docker, $(BUILD_TARGETS))
