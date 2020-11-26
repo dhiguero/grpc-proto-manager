@@ -18,7 +18,7 @@ import (
 const ProtoLangFileName = ".protolangs"
 
 // ExcludedDirs with the list of directories that will be excluded by default.
-var ExcludedDirs = []string{".git"}
+var ExcludedDirs = []string{".git", ".github"}
 
 // GPM structure with the manager main loop.
 type GPM struct {
@@ -30,6 +30,31 @@ type GPM struct {
 // NewManager creates a new GPM entity.
 func NewManager(cfg config.ServiceConfig) *GPM {
 	return &GPM{cfg: cfg}
+}
+
+// SetupGeneratorConfig determines if the required parameters are present depending on the selected environment.
+func (gpm *GPM) SetupGeneratorConfig() error {
+	generator, exists := protos.GeneratorTypeToEnum[gpm.cfg.GeneratorName]
+	if !exists {
+		return fmt.Errorf("unsupported generator %s", gpm.cfg.GeneratorName)
+	}
+	switch generator {
+	case protos.DockerizedCmd:
+		return gpm.SetupDockerizedGeneration()
+	}
+	return nil
+}
+
+// SetupDockerizedGeneration configures the different provider attending to the execution environment. In this
+// case, as we are being executed from within a docker container, git information needs to be set.
+func (gpm *GPM) SetupDockerizedGeneration() error {
+	if gpm.cfg.RepositoryPusherUsername == "" {
+		return fmt.Errorf("--repositoryPusherUsername is required when running in a containerized environment")
+	}
+	if gpm.cfg.RepositoryPusherEmail == "" {
+		return fmt.Errorf("--repositoryPusherEmail is required when running in a containerized environment")
+	}
+	return gpm.repositoryProvider.ConfigurePusher(gpm.cfg.RepositoryPusherUsername, gpm.cfg.RepositoryPusherEmail)
 }
 
 // Run triggers the execution of the command.
@@ -52,6 +77,11 @@ func (gpm *GPM) Run(basePath string) error {
 		return err
 	}
 	gpm.protoGenerator = protoGenerator
+
+	err = gpm.SetupGeneratorConfig()
+	if err != nil {
+		return err
+	}
 
 	// Iterate over the project directories
 
@@ -141,12 +171,14 @@ func (gpm *GPM) ProcessProtoDirectory(targetPath string, name string) error {
 	log.Debug().Interface("languages", targetLanguages).Msg("target")
 	for _, language := range targetLanguages {
 		repoName := gpm.getRepoName(name, language)
-		repoURL := gpm.repositoryProvider.GetRepoURL(gpm.cfg.RepositoryOrganization, repoName)
-
+		repoURL, err := gpm.repositoryProvider.GetRepoURL(gpm.cfg.RepositoryOrganization, repoName)
+		if err != nil {
+			return fmt.Errorf("cannot determine repository URL: %w", err)
+		}
 		// First step is to clone the generated proto repo to compare the files. Notice that generated files have timestamped data,
 		// and diff is not recommended on that data.
 		tmpRepoDir := path.Join(gpm.cfg.TempPath, repoName)
-		err := gpm.repositoryProvider.Clone(repoURL, tmpRepoDir)
+		err = gpm.repositoryProvider.Clone(repoURL, tmpRepoDir)
 		if err != nil {
 			return fmt.Errorf("cannot clone target repository %s to calculate diff: %w", repoURL, err)
 		}

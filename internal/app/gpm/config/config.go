@@ -20,6 +20,10 @@ type ServiceConfig struct {
 	RepositoryProvider string
 	// RepositoryOrganization with the organization that contains the generated code.
 	RepositoryOrganization string
+	// RepositoryUsername with the name of the actor pushing the changes. This value is required if GPM is executed from within a container.
+	RepositoryPusherUsername string
+	// RepositoryEmail with the email pushing the changes. This value is required if GPM is executed from within a container.
+	RepositoryPusherEmail string
 	// DefaultLanguage to generate the protos if not .protolangs file is found.
 	DefaultLanguage string
 	// ProjectPath with the path of the gRPC proto repo being analyzed.
@@ -89,4 +93,9 @@ func (sc *ServiceConfig) Print() {
 		log.Warn().Msg("Proto publication is disabled")
 	}
 	log.Info().Str("URL", sc.RepositoryOrganization).Msg("generated code repository")
+	if sc.RepositoryPusherUsername == "" && sc.RepositoryPusherEmail == "" {
+		log.Info().Str("username", "<system default>").Str("email", "<system default>").Msg("pusher information")
+	} else {
+		log.Info().Str("username", sc.RepositoryPusherUsername).Str("email", sc.RepositoryPusherEmail).Msg("pusher information")
+	}
 }

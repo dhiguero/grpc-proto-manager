@@ -53,6 +53,19 @@ docker: $(addsuffix .docker, $(BUILD_TARGETS))
 		docker build bin/docker -t $(TARGET_DOCKER_REGISTRY)/$(basename $@):$(VERSION);\
 	fi
 
+.PHONY: docker-lite
+docker-lite: $(addsuffix .docker-lite, $(BUILD_TARGETS))
+
+%.docker-lite: %.linux
+	@if [ -f docker/$(basename $@)/Dockerfile.lite ]; then\
+		echo "Building docker lite image for "$(basename $@);\
+		rm -r bin/docker || true;\
+		mkdir -p bin/docker;\
+		cp docker/$(basename $@)/* bin/docker/.;\
+		cp bin/linux/$(basename $@) bin/docker/.;\
+		docker build -f bin/docker/Dockerfile.lite bin/docker -t $(TARGET_DOCKER_REGISTRY)/$(basename $@):$(VERSION);\
+	fi
+
 k8s:
 	@rm -r bin/k8s || true
 	@mkdir -p bin/k8s

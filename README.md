@@ -40,13 +40,30 @@ $ ./bin/darwin/gpm generate /<full_path>/gpm-example
 9:03PM INF publishing new version newVersion=v0.1.0 repo=grpc-ping-go
 ```
 
+## Installation
+
+## Generating protos
+
+There are different methods to execute GPM and generate protobuf stubs from CLI to docker environments.
+
+### Using the CLI
+
+### Using a docker container
+
+### Integration with GitHub Actions
 
 ## Roadmap/TODO
 
 - Add tests
 - Improve parametrization
 - Brew installation
-- Integration with GitHub actions
+- Extract the project to a single GitHub organization :)
+
+### Integration with GitHub actions
+
+[ ] Add a new GitHub action provider that makes use of HTTPS clonning
+[ ] Modify the dockerfile if needed to execute from the current working directory independenly of the expected one. GitHub sets its own.
+[ ] The new GitHub provider may need to set the pusher data partially (just email)
 
 ## Inspiration
 
