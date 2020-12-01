@@ -38,23 +38,29 @@ func (gpm *GPM) SetupGeneratorConfig() error {
 	if !exists {
 		return fmt.Errorf("unsupported generator %s", gpm.cfg.GeneratorName)
 	}
+
+	repoProvider, exists := repo.RepositoryTypeToEnum[gpm.cfg.RepositoryProvider]
+	if !exists {
+		return fmt.Errorf("unsupported repository provider %s", gpm.cfg.RepositoryProvider)
+	}
+
 	switch generator {
 	case protos.DockerizedCmd:
-		return gpm.SetupDockerizedGeneration()
+		return gpm.SetupDockerizedGeneration(repoProvider)
 	}
 	return nil
 }
 
 // SetupDockerizedGeneration configures the different provider attending to the execution environment. In this
 // case, as we are being executed from within a docker container, git information needs to be set.
-func (gpm *GPM) SetupDockerizedGeneration() error {
+func (gpm *GPM) SetupDockerizedGeneration(repoProvider repo.RepositoryType) error {
 	if gpm.cfg.RepositoryPusherUsername == "" {
 		return fmt.Errorf("--repositoryPusherUsername is required when running in a containerized environment")
 	}
 	if gpm.cfg.RepositoryPusherEmail == "" {
 		return fmt.Errorf("--repositoryPusherEmail is required when running in a containerized environment")
 	}
-	return gpm.repositoryProvider.ConfigurePusher(gpm.cfg.RepositoryPusherUsername, gpm.cfg.RepositoryPusherEmail)
+	return gpm.repositoryProvider.ConfigurePusher(gpm.cfg.RepositoryPusherUsername, gpm.cfg.RepositoryPusherEmail, gpm.cfg.RepositoryAccessToken)
 }
 
 // Run triggers the execution of the command.

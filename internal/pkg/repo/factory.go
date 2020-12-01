@@ -30,7 +30,7 @@ var RepositoryTypeToEnum = map[string]RepositoryType{
 // Provider defines the common interface for different repository managers (e.g., GitHub)
 type Provider interface {
 	// ConfigurePusher prepares the system to use a particular username/email to appear as the pusher of the commits.
-	ConfigurePusher(username string, email string) error
+	ConfigurePusher(username string, email string, accessToken string) error
 	// GetRepoURL builds the URL require for clone and commit operations.
 	GetRepoURL(organization string, repoName string) (string, error)
 	// Clone a given repository to a path

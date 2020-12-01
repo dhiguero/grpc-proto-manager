@@ -48,9 +48,32 @@ There are different methods to execute GPM and generate protobuf stubs from CLI 
 
 ### Using the CLI
 
+To use the CLI, clone the repo and execute:
+
+```
+$ make build
+$ ./bin/darwin/gpm generate <your_protorepo_path>
+```
+
+For linux OS, use `./bin/linux/gpm`.
+
 ### Using a docker container
 
+A docker container is also available so it is easier to generate the protos from a local machine:
+
+```
+$ docker run -v <your_protorepo_path>:/defs -v /<your_user_home>/.ssh:/root/.ssh dhiguero/gpm:v0.0.3
+```
+
+By using this approach, the protorepo is mounted on the `/defs` directory of the docker image which corresponds to the default location for the generation of protos. Currently, ssh keys are required since this method clones repos through SSH and the public key is required for this to work. An alternative using [GitHub Personal Access Tokens](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token) will be available through the GPM GitHub Action or by executing the CLI passing `--personalAccessToken`.
+
 ### Integration with GitHub Actions
+
+In the works :) Stay tunned.
+
+- [X] Add a new GitHub action provider that makes use of HTTPS clonning
+- [X] Modify the dockerfile if needed to execute from the current working directory independenly of the expected one. GitHub sets its own.
+- [X] The new GitHub provider may need to set the pusher data
 
 ## Roadmap/TODO
 
@@ -58,12 +81,7 @@ There are different methods to execute GPM and generate protobuf stubs from CLI 
 - Improve parametrization
 - Brew installation
 - Extract the project to a single GitHub organization :)
-
-### Integration with GitHub actions
-
-[ ] Add a new GitHub action provider that makes use of HTTPS clonning
-[ ] Modify the dockerfile if needed to execute from the current working directory independenly of the expected one. GitHub sets its own.
-[ ] The new GitHub provider may need to set the pusher data partially (just email)
+- Improve overall documentation abouth protos and GPM
 
 ## Inspiration
 

@@ -19,6 +19,8 @@ type GHCommon struct {
 	UseSSH bool
 	// UseHTTPS determines if clone operations will use HTTPS credentials.
 	UseHTTPS bool
+	// PersonalAccessToken required to operate with GitHub. This is used in conjunction with UseHTTPS if non empty.
+	PersonalAccessToken string
 	// SetPusherUserName determines if the user name of the pusher actor needs to be set.
 	SetPusherUserName bool
 	// PusherUserName with the name to use as commiter.
@@ -29,14 +31,43 @@ type GHCommon struct {
 	PusherEmail string
 }
 
+// ConfigurePusher prepares the system to use a particular username/email to appear as the pusher of the commits.
+func (ghc *GHCommon) ConfigurePusher(username string, email string, accessToken string) error {
+	log.Debug().Str("username", username).Str("email", email).Str("accessToken", strings.Repeat("*", len(accessToken))).Msg("setting pusher information")
+	// Notice that in GitHub, it is recommended to setup this information per repository, therefore this action
+	// will be executed on per-repo basis before the commit & push information.
+
+	// To setup this, the following commands will be issued:
+	// git config -f /tmp/grpc-internal-agenda-go/.git/config user.name \"Your Name\"
+	// git config -f /tmp/grpc-internal-agenda-go/.git/config user.email "my.name@server.com"
+
+	// Alternatively, each git command may be configured with a given user name. However, given that this is executed from
+	// a local temporal copy, there should not be any collateral impact in configuring the local repo. The alternative would be:
+	// git -c user.name="Your name" -c user.email="my.name@server.com" commit -m "Commit message" ...
+	if username != "" {
+		ghc.SetPusherUserName = true
+		ghc.PusherUserName = username
+	}
+	if email != "" {
+		ghc.SetPusherEmail = true
+		ghc.PusherEmail = email
+	}
+	ghc.PersonalAccessToken = accessToken
+	return nil
+}
+
 // GetRepoURL builds the URL require for clone and commit operations.
 func (ghc *GHCommon) GetRepoURL(organization string, repoName string) (string, error) {
 	if ghc.UseSSH {
 		// git@github.com:dhiguero/go-template.git
 		return fmt.Sprintf("git@github.com:%s/%s.git", organization, repoName), nil
 	} else if ghc.UseHTTPS {
-		// https://github.com/dhiguero/go-template.git
-		return fmt.Sprintf("https://github.com/%s/%s.git", organization, repoName), nil
+		if ghc.PersonalAccessToken == "" {
+			// https://github.com/dhiguero/go-template.git
+			return fmt.Sprintf("https://github.com/%s/%s.git", organization, repoName), nil
+		}
+		// https://{TOKEN}@github.com/dhiguero/go-template.git
+		return fmt.Sprintf("https://%s@github.com/%s/%s.git", ghc.PersonalAccessToken, organization, repoName), nil
 	}
 	return "", fmt.Errorf("cannot obtain target repo URL. Set useSSH or UseHTTPS")
 }
@@ -78,7 +109,7 @@ func (ghc *GHCommon) GetLastVersion(repoPath string) (*Version, error) {
 	return FromTag(string(stdoutStderr))
 }
 
-// setPusherInfo sets the pusher information of the local repository.
+// SetPusherInfo sets the pusher information of the local repository.
 func (ghc *GHCommon) SetPusherInfo(repoPath string) error {
 
 	if ghc.SetPusherUserName {
