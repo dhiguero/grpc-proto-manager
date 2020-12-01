@@ -11,6 +11,7 @@ COMMIT=$(shell git log -1 --pretty=format:"%H")
 # Tools
 GO_CMD=go
 GO_BUILD=$(GO_CMD) build
+GO_TEST=$(GO_CMD) test
 GO_LDFLAGS=-ldflags "-X main.Version=$(VERSION) -X=main.Commit=$(COMMIT)"
 
 # Docker options
@@ -20,10 +21,13 @@ TARGET_DOCKER_REGISTRY ?= $$USER
 TARGET_K8S_NAMESPACE ?= default
 
 .PHONY: clean
-
 clean:
-	rm -r bin
+	rm -r bin || true
 	mkdir -p bin/darwin/
+
+# make all action to perform all steps.
+.PHONY: all
+all: clean test build 
 
 # Build target for local environment default
 build: $(addsuffix .local,$(BUILD_TARGETS))
@@ -40,6 +44,10 @@ build-linux: $(addsuffix .linux,$(BUILD_TARGETS))
 	@ echo "Building linux binary $@"
 	@GOOS=linux GOARCH=amd64 CGO_ENABLED=0 $(GO_BUILD) $(GO_LDFLAGS) -o bin/linux/$(basename $@) ./cmd/$(basename $@)/main.go
 
+.PHONY: test
+test:
+	@$(GO_TEST) -v ./...
+
 .PHONY: docker
 docker: $(addsuffix .docker, $(BUILD_TARGETS))
 
@@ -51,6 +59,19 @@ docker: $(addsuffix .docker, $(BUILD_TARGETS))
 		cp docker/$(basename $@)/* bin/docker/.;\
 		cp bin/linux/$(basename $@) bin/docker/.;\
 		docker build bin/docker -t $(TARGET_DOCKER_REGISTRY)/$(basename $@):$(VERSION);\
+	fi
+
+.PHONY: docker-lite
+docker-lite: $(addsuffix .docker-lite, $(BUILD_TARGETS))
+
+%.docker-lite: %.linux
+	@if [ -f docker/$(basename $@)/Dockerfile.lite ]; then\
+		echo "Building docker lite image for "$(basename $@);\
+		rm -r bin/docker || true;\
+		mkdir -p bin/docker;\
+		cp docker/$(basename $@)/* bin/docker/.;\
+		cp bin/linux/$(basename $@) bin/docker/.;\
+		docker build -f bin/docker/Dockerfile.lite bin/docker -t $(TARGET_DOCKER_REGISTRY)/$(basename $@):$(VERSION);\
 	fi
 
 k8s:

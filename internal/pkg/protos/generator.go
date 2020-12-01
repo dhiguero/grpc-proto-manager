@@ -8,16 +8,20 @@ type GeneratorType int
 const (
 	// DockerCmd proto generator.
 	DockerCmd GeneratorType = iota
+	// DockerizedCmd to use the embeeded proto generator.
+	DockerizedCmd
 )
 
 // GeneratorTypeToString map associating type an string representation.
 var GeneratorTypeToString = map[GeneratorType]string{
-	DockerCmd: "docker",
+	DockerCmd:     "docker",
+	DockerizedCmd: "dockerized",
 }
 
 // GeneratorTypeToEnum map associating string representation with enum type.
 var GeneratorTypeToEnum = map[string]GeneratorType{
-	"docker": DockerCmd,
+	"docker":     DockerCmd,
+	"dockerized": DockerizedCmd,
 }
 
 // Generator interface for all implementations.
@@ -35,6 +39,8 @@ func NewGenerator(generatorName string) (Generator, error) {
 	switch gen {
 	case DockerCmd:
 		return NewDockerCmdGenerator()
+	case DockerizedCmd:
+		return NewDockerizedCmdGenerator()
 	}
 	return nil, fmt.Errorf("no implementation found for %s generator", generatorName)
 }
