@@ -22,7 +22,7 @@ TARGET_K8S_NAMESPACE ?= default
 
 .PHONY: clean
 clean:
-	rm -r bin
+	rm -r bin || true
 	mkdir -p bin/darwin/
 
 # make all action to perform all steps.
